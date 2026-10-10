@@ -33,7 +33,7 @@ Override considered: WinUI 3/C# gives the most native look but locks UI to Windo
 │ phile-tags    SQLite tags + NTFS ADS mirror, virtual folders           │
 │ phile-rename  regex + token engine, dry-run diff, undo journal         │
 │ phile-disk    parallel size scan, treemap data, duplicate finder       │
-│ phile-term    ConPTY via portable-pty, streamed to xterm.js            │
+│ phile-term    ConPTY via portable-pty → xterm.js; shell profiles, env   │
 │ phile-store   SQLite schema + migrations (workspaces, settings)        │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -64,8 +64,7 @@ Rules that keep it future-proof:
 | 3.4 | Flatten subfolders | fs | 2 |
 | 4.1 | Hybrid instant search (filename index + content grep, token filters) | index, search | 4 |
 | 4.2 | Disk treemap/sunburst, orphan caches, duplicates | disk | 4 |
-| 4.3 | Terminal drawer locked to focused dir (PowerShell/cmd/WSL/Git Bash) | term | 3 |
-| 4.x+ | Rest of spec (truncated in message) | TBD | folded in on arrival |
+| 4.3 | Terminal drawer locked to focused dir; shell profiles (PowerShell, Bash via Git Bash/WSL, Zsh via WSL, cmd), auto-detected; inherits the app's live environment plus per-profile overrides; follows pane on navigate (`cd` injected when idle) | term | 3 |
 
 ## 4. Phases
 
@@ -101,4 +100,3 @@ Rules that keep it future-proof:
 
 - **GitHub repo** (suggested `muzzy111/phile`) to scaffold, push, and run Windows CI.
 - Later: code-signing certificate (Phase 5).
-- Remainder of feature spec (section 4 onward).
