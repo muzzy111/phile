@@ -1,0 +1,16 @@
+[package]
+name = "phile-store"
+description = "SQLite persistence: settings, workspaces, aliases, directory frecency"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+rusqlite = { version = "0.37", features = ["bundled"] }
+nucleo-matcher = "0.3"
+
+[dev-dependencies]
+tempfile.workspace = true

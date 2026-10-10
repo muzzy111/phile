@@ -1,0 +1,16 @@
+[package]
+name = "phile-ops"
+description = "Queued file operations: copy, move, delete with pause, retry, throttle and verify"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+walkdir.workspace = true
+trash = "5"
+phile-meta.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

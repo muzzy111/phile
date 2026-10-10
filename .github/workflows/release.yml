@@ -1,0 +1,36 @@
+name: Release
+
+# Push a tag like v0.1.0 to publish installers on the GitHub Releases page.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
+      - run: pnpm --dir ui install --frozen-lockfile
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: src-tauri
+          tauriScript: pnpm dlx @tauri-apps/cli@2.12.1
+          tagName: ${{ github.ref_name }}
+          releaseName: Phile ${{ github.ref_name }}
+          releaseBody: Download **Phile_x64-setup.exe**, double-click it, done. No admin rights needed.
+          releaseDraft: false
