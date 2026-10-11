@@ -32,6 +32,10 @@ A fast, modern file explorer for Windows. Two panes, tabs, workspaces, instant p
 
 Coming next: git badges, metadata/EXIF sidebar, batch renamer, terminal drawer, instant search, tags, disk heatmap. See [docs/PLAN.md](docs/PLAN.md).
 
+## Claude Code workspace (optional)
+
+Turn Claude Code into an Antigravity-style agent IDE that uses Phile to find, move, copy and organize files: double-click **`install-claude-mod.cmd`**, then type `/ag` in Claude Code. Details: [claude-mod/phile/README.md](claude-mod/phile/README.md).
+
 ## For developers
 
 See [CLAUDE.md](CLAUDE.md) for layout, rules and commands.

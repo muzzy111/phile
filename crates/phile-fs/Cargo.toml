@@ -10,6 +10,7 @@ serde.workspace = true
 thiserror.workspace = true
 walkdir.workspace = true
 dirs = "6"
+nucleo-matcher = "0.3"
 
 [dev-dependencies]
 tempfile.workspace = true

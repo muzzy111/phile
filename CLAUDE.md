@@ -7,6 +7,8 @@ Windows file explorer. Tauri 2 shell, Rust core crates, SolidJS UI. Plan and pha
 - `crates/phile-ops`: job queue (copy/move/trash/delete, pause, retry, throttle, blake3 verify, collisions).
 - `crates/phile-meta`: hashes, MIME sniff, hex dump, bounded text reads.
 - `crates/phile-store`: SQLite (settings, workspaces, aliases, pins, frecency + fuzzy teleport).
+- `crates/phile-agent`: core as agent tools. One table (`tools()`) + one dispatcher (`call()`) serve the CLI, `phile-agent mcp` and the Claude Code mod. New tool = schema entry + match arm + test.
+- `claude-mod/phile`: Claude Code mod (Agent Manager/Explorer/Search panes, modes). `$` never crosses an import; check with `claude plugin validate` and `claude plugin test`.
 - `src-tauri`: thin adapter. Commands only delegate to crates. No logic here.
 - `ui/src/lib/api.ts`: the only place that calls `invoke`. Types mirror Rust structs (camelCase).
 - `ui/src/lib/commands.ts`: single registry for shortcuts AND the command palette. New feature = new entry.
@@ -23,6 +25,7 @@ Windows file explorer. Tauri 2 shell, Rust core crates, SolidJS UI. Plan and pha
 
 ## Commands
 - Dev: `pnpm --dir ui install && pnpm dlx @tauri-apps/cli@2 dev` (from `src-tauri/`)
-- Test: `cargo test --workspace --exclude phile` and `pnpm --dir ui build` (typechecks)
+- Test: `cargo test --workspace --exclude phile` and `pnpm --dir ui build` (typechecks); mod: `claude plugin test claude-mod/phile`
+- Mod install (Windows): `install-claude-mod.cmd`
 - Lint: `cargo clippy --workspace -- -D warnings`
 - Installer: CI builds it on every push (`.github/workflows/ci.yml`); tag `vX.Y.Z` to publish a release.

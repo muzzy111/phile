@@ -34,3 +34,10 @@ jobs:
           releaseName: Phile ${{ github.ref_name }}
           releaseBody: Download **Phile_x64-setup.exe**, double-click it, done. No admin rights needed.
           releaseDraft: false
+      - name: Attach phile-agent (Claude Code mod backend)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cargo build --release -p phile-agent
+          gh release upload "${{ github.ref_name }}" target/release/phile-agent.exe --clobber

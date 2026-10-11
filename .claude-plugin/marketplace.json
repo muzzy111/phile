@@ -1,0 +1,11 @@
+{
+  "name": "phile",
+  "owner": { "name": "muzzy111" },
+  "plugins": [
+    {
+      "name": "phile",
+      "source": "./claude-mod/phile",
+      "description": "Antigravity-style agent workspace for Claude Code with Phile as the file backend."
+    }
+  ]
+}

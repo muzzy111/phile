@@ -1,0 +1,16 @@
+{
+  "name": "phile",
+  "version": "0.1.0",
+  "description": "Antigravity-style agent workspace for Claude Code, with Phile as the file backend: Agent Manager, Explorer and Search panes, planning/fast modes, and journaled file move/copy/search/undo tools.",
+  "author": { "name": "muzzy111" },
+  "homepage": "https://github.com/muzzy111/phile",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "agentPath": {
+      "type": "string",
+      "title": "phile-agent path",
+      "description": "Full path to phile-agent(.exe). Leave empty to find it automatically.",
+      "default": ""
+    }
+  }
+}
