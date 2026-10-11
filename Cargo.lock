@@ -2711,10 +2711,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "phile-agent"
+version = "0.1.0"
+dependencies = [
+ "dirs 6.0.0",
+ "phile-fs",
+ "phile-meta",
+ "phile-ops",
+ "phile-store",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "phile-fs"
 version = "0.1.0"
 dependencies = [
  "dirs 6.0.0",
+ "nucleo-matcher",
  "serde",
  "tempfile",
  "thiserror 2.0.21",

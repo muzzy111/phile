@@ -18,6 +18,7 @@ phile-fs = { path = "crates/phile-fs" }
 phile-ops = { path = "crates/phile-ops" }
 phile-meta = { path = "crates/phile-meta" }
 phile-store = { path = "crates/phile-store" }
+phile-agent = { path = "crates/phile-agent" }
 
 [profile.release]
 lto = true

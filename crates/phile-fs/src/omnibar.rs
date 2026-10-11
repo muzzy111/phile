@@ -14,12 +14,22 @@ pub enum Target {
     /// Navigate to the parent and select the file.
     File { dir: String, path: String },
     /// Nothing exists there; `fallback` is the nearest existing ancestor.
-    NotFound { input: String, expanded: String, fallback: Option<String> },
+    NotFound {
+        input: String,
+        expanded: String,
+        fallback: Option<String>,
+    },
 }
 
 /// Resolve `input` relative to `cwd`, using `aliases` and the process environment.
 pub fn resolve(input: &str, cwd: &Path, aliases: &HashMap<String, String>) -> Target {
-    resolve_with(input, cwd, aliases, &|k| std::env::var(k).ok(), dirs::home_dir())
+    resolve_with(
+        input,
+        cwd,
+        aliases,
+        &|k| std::env::var(k).ok(),
+        dirs::home_dir(),
+    )
 }
 
 pub fn resolve_with(
@@ -31,17 +41,32 @@ pub fn resolve_with(
 ) -> Target {
     let expanded = expand(input.trim(), aliases, env, home.as_deref());
     let p = PathBuf::from(&expanded);
-    let p = if p.is_absolute() || has_drive(&expanded) { p } else { cwd.join(p) };
+    let p = if p.is_absolute() || has_drive(&expanded) {
+        p
+    } else {
+        cwd.join(p)
+    };
     let p = normalize(&p);
     let s = p.to_string_lossy().into_owned();
     if p.is_dir() {
         Target::Dir { path: s }
     } else if p.exists() {
-        let dir = p.parent().map(|d| d.to_string_lossy().into_owned()).unwrap_or_default();
+        let dir = p
+            .parent()
+            .map(|d| d.to_string_lossy().into_owned())
+            .unwrap_or_default();
         Target::File { dir, path: s }
     } else {
-        let fallback = p.ancestors().skip(1).find(|a| a.is_dir()).map(|a| a.to_string_lossy().into_owned());
-        Target::NotFound { input: input.into(), expanded: s, fallback }
+        let fallback = p
+            .ancestors()
+            .skip(1)
+            .find(|a| a.is_dir())
+            .map(|a| a.to_string_lossy().into_owned());
+        Target::NotFound {
+            input: input.into(),
+            expanded: s,
+            fallback,
+        }
     }
 }
 
@@ -51,7 +76,12 @@ fn has_drive(s: &str) -> bool {
 }
 
 /// Expand aliases, `~`, env vars, quotes and URL prefixes. Pure string transform.
-pub fn expand(input: &str, aliases: &HashMap<String, String>, env: &dyn Fn(&str) -> Option<String>, home: Option<&Path>) -> String {
+pub fn expand(
+    input: &str,
+    aliases: &HashMap<String, String>,
+    env: &dyn Fn(&str) -> Option<String>,
+    home: Option<&Path>,
+) -> String {
     let mut s = input.trim_matches('"').trim_matches('\'').to_string();
     if let Some(rest) = s.strip_prefix("file:///") {
         s = percent_decode(rest);
@@ -61,7 +91,10 @@ pub fn expand(input: &str, aliases: &HashMap<String, String>, env: &dyn Fn(&str)
     }
     // Alias: "@name" or "@name/rest"
     if let Some(rest) = s.strip_prefix('@') {
-        let (name, tail) = rest.split_once(['/', '\\']).map(|(a, b)| (a, Some(b))).unwrap_or((rest, None));
+        let (name, tail) = rest
+            .split_once(['/', '\\'])
+            .map(|(a, b)| (a, Some(b)))
+            .unwrap_or((rest, None));
         if let Some(target) = aliases.get(name) {
             s = match tail {
                 Some(t) => format!("{}/{}", target.trim_end_matches(['/', '\\']), t),
@@ -78,11 +111,23 @@ pub fn expand(input: &str, aliases: &HashMap<String, String>, env: &dyn Fn(&str)
     // Windows accepts forward slashes; POSIX-style "/c/Users" (Git Bash) -> "C:/Users".
     if cfg!(windows) {
         let b = s.as_bytes();
-        if b.len() >= 2 && b[0] == b'/' && b[1].is_ascii_alphabetic() && (b.len() == 2 || b[2] == b'/') {
+        if b.len() >= 2
+            && b[0] == b'/'
+            && b[1].is_ascii_alphabetic()
+            && (b.len() == 2 || b[2] == b'/')
+        {
             s = format!("{}:{}", (b[1] as char).to_ascii_uppercase(), &s[2..]);
         }
-        if s.starts_with("/mnt/") && s.len() >= 6 && s.as_bytes()[5].is_ascii_alphabetic() && (s.len() == 6 || s.as_bytes()[6] == b'/') {
-            s = format!("{}:{}", (s.as_bytes()[5] as char).to_ascii_uppercase(), &s[6..]);
+        if s.starts_with("/mnt/")
+            && s.len() >= 6
+            && s.as_bytes()[5].is_ascii_alphabetic()
+            && (s.len() == 6 || s.as_bytes()[6] == b'/')
+        {
+            s = format!(
+                "{}:{}",
+                (s.as_bytes()[5] as char).to_ascii_uppercase(),
+                &s[6..]
+            );
         }
     }
     s
@@ -115,7 +160,10 @@ fn expand_env(s: &str, env: &dyn Fn(&str) -> Option<String>) -> String {
                         None => (String::new(), 0),
                     }
                 } else {
-                    let n: String = c[i + 1..].iter().take_while(|x| x.is_ascii_alphanumeric() || **x == '_').collect();
+                    let n: String = c[i + 1..]
+                        .iter()
+                        .take_while(|x| x.is_ascii_alphanumeric() || **x == '_')
+                        .collect();
                     let l = n.chars().count() + 1;
                     (n, l)
                 };
@@ -221,6 +269,9 @@ mod tests {
 
     #[test]
     fn normalizes() {
-        assert_eq!(normalize(Path::new("/a/b/../c/./d")), PathBuf::from("/a/c/d"));
+        assert_eq!(
+            normalize(Path::new("/a/b/../c/./d")),
+            PathBuf::from("/a/c/d")
+        );
     }
 }

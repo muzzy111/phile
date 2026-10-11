@@ -2,6 +2,7 @@
 //! No UI or Tauri dependencies; everything here is testable headless.
 
 pub mod omnibar;
+pub mod search;
 
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -10,7 +11,10 @@ use std::time::UNIX_EPOCH;
 #[derive(Debug, thiserror::Error)]
 pub enum FsError {
     #[error("io error at {path}: {source}")]
-    Io { path: PathBuf, source: std::io::Error },
+    Io {
+        path: PathBuf,
+        source: std::io::Error,
+    },
     #[error("not a directory: {0}")]
     NotDir(PathBuf),
 }
@@ -60,9 +64,16 @@ fn is_hidden(name: &str, _md: &std::fs::Metadata) -> bool {
 }
 
 pub fn entry_from_path(path: &Path) -> Result<Entry> {
-    let lmd = std::fs::symlink_metadata(path).map_err(|e| FsError::Io { path: path.into(), source: e })?;
+    let lmd = std::fs::symlink_metadata(path).map_err(|e| FsError::Io {
+        path: path.into(),
+        source: e,
+    })?;
     let is_link = lmd.file_type().is_symlink();
-    let md = if is_link { std::fs::metadata(path).unwrap_or(lmd.clone()) } else { lmd.clone() };
+    let md = if is_link {
+        std::fs::metadata(path).unwrap_or(lmd.clone())
+    } else {
+        lmd.clone()
+    };
     let name = path
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
@@ -79,13 +90,19 @@ pub fn entry_from_path(path: &Path) -> Result<Entry> {
     let ext = if md.is_dir() {
         String::new()
     } else {
-        path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default()
+        path.extension()
+            .map(|e| e.to_string_lossy().to_lowercase())
+            .unwrap_or_default()
     };
     Ok(Entry {
         hidden: is_hidden(&name, &lmd),
         name,
         path: path.to_string_lossy().into_owned(),
-        kind: if is_link && md.is_dir() { Kind::Symlink } else { kind },
+        kind: if is_link && md.is_dir() {
+            Kind::Symlink
+        } else {
+            kind
+        },
         size: if md.is_file() { md.len() } else { 0 },
         modified: ms(md.modified()),
         ext,
@@ -97,8 +114,14 @@ pub fn list_dir(dir: &Path) -> Result<Vec<Entry>> {
     if !dir.is_dir() {
         return Err(FsError::NotDir(dir.into()));
     }
-    let rd = std::fs::read_dir(dir).map_err(|e| FsError::Io { path: dir.into(), source: e })?;
-    let mut out: Vec<Entry> = rd.filter_map(|r| r.ok()).filter_map(|d| entry_from_path(&d.path()).ok()).collect();
+    let rd = std::fs::read_dir(dir).map_err(|e| FsError::Io {
+        path: dir.into(),
+        source: e,
+    })?;
+    let mut out: Vec<Entry> = rd
+        .filter_map(|r| r.ok())
+        .filter_map(|d| entry_from_path(&d.path()).ok())
+        .collect();
     sort_default(&mut out);
     Ok(out)
 }
@@ -108,7 +131,8 @@ pub fn sort_default(v: &mut [Entry]) {
     v.sort_by(|a, b| {
         let ad = a.kind == Kind::Dir;
         let bd = b.kind == Kind::Dir;
-        bd.cmp(&ad).then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
+        bd.cmp(&ad)
+            .then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
     });
 }
 
@@ -133,23 +157,42 @@ pub fn breadcrumbs(path: &Path) -> Vec<(String, String)> {
     let mut out = Vec::new();
     for c in path.components() {
         acc.push(c);
-        let label = c.as_os_str().to_string_lossy().trim_end_matches(['\\', '/']).to_string();
+        let label = c
+            .as_os_str()
+            .to_string_lossy()
+            .trim_end_matches(['\\', '/'])
+            .to_string();
         if label.is_empty() && !out.is_empty() {
             continue;
         }
-        out.push((if label.is_empty() { "/".into() } else { label }, acc.to_string_lossy().into_owned()));
+        out.push((
+            if label.is_empty() { "/".into() } else { label },
+            acc.to_string_lossy().into_owned(),
+        ));
     }
     out
 }
 
 fn root_entry(p: String) -> Entry {
-    Entry { name: p.clone(), path: p, kind: Kind::Dir, size: 0, modified: 0, hidden: false, ext: String::new() }
+    Entry {
+        name: p.clone(),
+        path: p,
+        kind: Kind::Dir,
+        size: 0,
+        modified: 0,
+        hidden: false,
+        ext: String::new(),
+    }
 }
 
 /// Drives (Windows) or `/` (elsewhere) for the sidebar.
 #[cfg(windows)]
 pub fn roots() -> Vec<Entry> {
-    (b'A'..=b'Z').map(|l| format!("{}:\\", l as char)).filter(|p| Path::new(p).exists()).map(root_entry).collect()
+    (b'A'..=b'Z')
+        .map(|l| format!("{}:\\", l as char))
+        .filter(|p| Path::new(p).exists())
+        .map(root_entry)
+        .collect()
 }
 
 #[cfg(not(windows))]

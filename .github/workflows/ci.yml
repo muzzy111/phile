@@ -32,6 +32,15 @@ jobs:
       - run: pnpm --dir ui build
       - run: cargo test --workspace --exclude phile
       - run: cargo clippy --workspace -- -D warnings
+      # The mod API is early access and moves between Claude Code releases:
+      # report here, never block the app's build on it.
+      - name: Claude Code mod (validate + tests)
+        continue-on-error: true
+        shell: bash
+        run: |
+          npm i -g @anthropic-ai/claude-code
+          claude plugin validate claude-mod/phile
+          claude plugin test claude-mod/phile
 
   installer:
     name: Windows installer
@@ -52,10 +61,12 @@ jobs:
       - run: pnpm --dir ui install --frozen-lockfile
       - run: pnpm dlx @tauri-apps/cli@2.12.1 build
         working-directory: src-tauri
+      - run: cargo build --release -p phile-agent
       - uses: actions/upload-artifact@v4
         with:
           name: Phile-installer-${{ github.sha }}
           path: |
             target/release/bundle/nsis/*.exe
             target/release/bundle/msi/*.msi
+            target/release/phile-agent.exe
           if-no-files-found: error
